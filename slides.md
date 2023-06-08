@@ -271,6 +271,69 @@ type FormState = {
 </v-clicks>
 
 ---
+
+## 场景一： 通过 Zod 校验环境变量
+
+<div v-show="$slidev.nav.clicks < 1">
+
+```ts
+
+export const envSchema = z.object({
+  // 项目本地运行端口号
+  VITE_PORT: z.string().optional().refine((v) => {
+    if (v) return isNumberLike(v)
+    return true
+  }, {
+    message: "VITE_PORT must be a number"
+  }).transform(Number),
+
+  // Base public path when served in development or production
+  VITE_PUBLIC_PATH: z.string().startsWith('/').default("/"),
+
+  // 开发环境路由历史模式（Hash模式传"hash"、HTML5模式传"h5"、Hash模式带base参数传"hash,base参数"、HTML5模式带base参数传"h5,base参数"）
+  VITE_ROUTER_HISTORY: z.union([z.literal("h5"), z.literal("hash")]),
+
+  // 本地跨域代理匹配的 prefix
+  VITE_PROXY_DOMAIN: z.string().optional(),
+
+  // 线上环境后端地址
+  VITE_PROXY_DOMAIN_REAL: z.string().url()
+})
+.strict() // 严格模式，如果环境变量中存在任何未知的 keys，Zod 将抛出一个错误。
+```
+
+</div>
+
+<v-click>
+
+```ts
+// vite.config.ts
+import { defineConfig, loadEnv } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+import { envSchema } from './envSchema'
+
+const root = process.cwd()
+
+// https://vitejs.dev/config/
+export default defineConfig(({ mode }) => {
+  const envs = loadEnv(mode, root) as ImportMetaEnv
+
+  const { VITE_PUBLIC_PATH } = envSchema.parse(envs)
+
+  return {
+    base: VITE_PUBLIC_PATH,
+    plugins: [
+      vue(),
+    ],
+  }
+})
+
+```
+
+</v-click>
+
+---
 layout: end
 ---
 
