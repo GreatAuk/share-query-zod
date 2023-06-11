@@ -69,10 +69,44 @@ layout: center
 这种策略首先从缓存中返回数据（过期的），同时发送 fetch 请求（重新验证），最后得到最新数据。
 
 ---
+transition: fade-out
+---
 
 # 基本的使用
 
-```vue
+```ts
+<script setup>
+import { ref } from 'vue'
+
+const isLoading = ref(false)
+const isError = ref(false)
+const data = ref<any[]>([])
+
+const getTodos = async() => {
+  try {
+    isLoading.value = true
+    data.value = await axios.get('/api/todos')
+  } catch (err) {
+    isError.value = true
+  } finally {
+    isLoading.value = false
+  }
+}
+</script>
+<template>
+  <span v-if="isLoading">Loading...</span>
+  <span v-else-if="isError">Error: {{ error.message }}</span>
+  <ul v-else>
+    <li v-for="todo in data" :key="todo.id">{{ todo.title }}</li>
+  </ul>
+</template>
+```
+
+---
+
+# 基本的使用
+
+```ts
 <script setup>
 import { useQuery } from '@tanstack/vue-query'
 
@@ -96,6 +130,25 @@ const { isLoading, isFetching, isError, data, error } = useQuery({
   </ul>
 </template>
 ```
+
+---
+
+<div v-click>
+  原始:
+  <img src="https://utopia1994.oss-cn-shanghai.aliyuncs.com/img-bed/202306092308597.png" />
+</div>
+
+<div v-click>
+  使用 vue-query 后:
+  <img src="https://utopia1994.oss-cn-shanghai.aliyuncs.com/img-bed/202306092318460.png" />
+</div>
+
+<div v-click class="mt-8">
+相比于一般的在组件中发起请求，vue-query 通过 useQuery 帮我们自然而然的生成了一个请求中间层。
+</div>
+---
+
+<img class="h-50vh m-auto" src="https://utopia1994.oss-cn-shanghai.aliyuncs.com/img-bed/202306092353426.png" />
 
 ---
 
