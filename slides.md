@@ -20,7 +20,7 @@ title: 技术分享-吴展华
 
 <v-clicks>
   <div class="text-left ml-30 mt-20 text-2xl">
-    1. @tanstack/vue-query: 用于数据请求的 Vue Hooks 库
+    1. @tanstack/vue-query: 异步状态管理库
   </div>
   <div class="text-left ml-30 py-4 text-2xl">
     2. 表格的封装和一些用户体验优化
@@ -57,19 +57,9 @@ layout: center
 # @tanstack/vue-query
 
 <div>
-  用于数据请求的 Vue Hooks 库。
+  异步状态管理库。
 </div>
 
----
-
-# stale-while-revalidate
-
-一种由 HTTP RFC 5861 推广的 HTTP 缓存失效策略。
-
-这种策略首先从缓存中返回数据（过期的），同时发送 fetch 请求（重新验证），最后得到最新数据。
-
----
-transition: fade-out
 ---
 
 # 基本的使用
@@ -133,10 +123,8 @@ const { isLoading, isFetching, isError, data, error } = useQuery({
 
 ---
 
-<div v-click>
-  原始:
-  <img src="https://utopia1994.oss-cn-shanghai.aliyuncs.com/img-bed/202306092308597.png" />
-</div>
+原始:
+<img src="https://utopia1994.oss-cn-shanghai.aliyuncs.com/img-bed/202306092308597.png" />
 
 <div v-click>
   使用 vue-query 后:
@@ -146,6 +134,17 @@ const { isLoading, isFetching, isError, data, error } = useQuery({
 <div v-click class="mt-8">
 相比于一般的在组件中发起请求，vue-query 通过 useQuery 帮我们自然而然的生成了一个请求中间层。
 </div>
+
+---
+
+# stale-while-revalidate
+
+一种由 HTTP RFC 5861 推广的 HTTP 缓存失效策略。
+
+这种策略首先从缓存中返回数据（过期的），同时发送 fetch 请求（重新验证），最后得到最新数据。
+
+---
+transition: fade-out
 ---
 
 <img class="h-50vh m-auto" src="https://utopia1994.oss-cn-shanghai.aliyuncs.com/img-bed/202306092353426.png" />
@@ -174,6 +173,37 @@ const { isLoading, isFetching, isError, data, error } = useQuery({
 </v-clicks>
 
 ---
+
+# 乐观更新
+
+```ts
+// 更新单个的 todo
+const queryClient = useQueryClient()
+const updateTodo = () => {axios.post('/api/updateTodo')}
+const { mutate, isLoading, isError, ... } = useMutation({
+  mutationFn: updateTodo,
+  // 当 mutate 调用时
+  onMutate: async (newTodo) => {
+    // 取消相关的获取数据逻辑（这样它们就不会覆盖我们的乐观更新）
+    await queryClient.cancelQueries(["todos", newTodo.id]);
+    const previousTodo = queryClient.getQueryData(["todos", newTodo.id]); // 保存前一次状态的快照
+    queryClient.setQueryData(["todos", newTodo.id], newTodo); // 执行乐观更新
+    return { previousTodo, newTodo }; // 返回具有快照值和修改值的上下文对象
+  },
+  // 如果修改失败，则使用 onMutate 返回的上下文
+  onError: (err, newTodo, context) => {
+    queryClient.setQueryData(
+      ["todos", context.newTodo.id],
+      context.previousTodo,
+    );
+  },
+  onSettled: (newTodo) => { // 总是在错误或成功之后重新获取：
+    queryClient.invalidateQueries(["todos", newTodo.id]);
+  },
+});
+```
+
+---
 layout: center
 ---
 
@@ -194,8 +224,9 @@ layout: center
 - 封装组件 TableWrap, 规范、统一布局。
 - 封装 hook - useTable, 减少样板代码。
 - 分页、筛选条件、搜索条件、排序状态的持久化（同步到 url）。
-- 表格中的时间、状态、操作栏需保持词语完整不过行。
+- 应缓存用户在原列表中的浏览位置，并标记列表中已浏览项，当用户返回上级页面是回到原浏览位置。
 - 当页面内容不足一页时，不展示分页器。
+- 表格中的时间、状态、操作栏需保持词语完整不过行。
 - 诸如金额、数量等数值分布排列时，通常采用“右对齐”方式，既方便用户快捷读取数据，还可以使用户进行纵向数据对比。
 - 点击删除操作时，需要二次确认。
 - 当单元格数据为空时，可使用 - 来表示暂无数据。
@@ -285,7 +316,7 @@ type FormState = {
 </v-click>
 
 <v-click>
-  <a href="https://transform.tools/typescript-to-zod" target="_blank" class="text-xl">TypeScript to Zod </a>
+  <a href="https://transform.tools/typescript-to-zod" target="_blank" class="text-xl">Tool: TypeScript to Zod </a>
 </v-click>
 
 ---
@@ -295,7 +326,7 @@ type FormState = {
 
 - 它很小：8kb 缩小 + 压缩
 - 零依赖
-- 基于 schema 推荐 ts 类型
+- 基于 schema 推导 ts 类型
 - 简洁、可链接的界面
 - 支持 Promise 和函数模式
 - 也适用于纯 JavaScript！你不需要使用 TypeScript。
@@ -320,6 +351,8 @@ type FormState = {
 - 后端接口参数校验
 - 配置文件验证：用于验证应用程序的配置文件，例如验证环境变量、JSON 配置文件等。
 - 上报参数过滤敏感信息字段
+- SessionStorage、LocalStorage 数据校验
+- 解析来自第三方数据源的数据
 
 </v-clicks>
 
