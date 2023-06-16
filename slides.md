@@ -19,14 +19,14 @@ title: 技术分享-吴展华
 # 前端技术分享
 
 <v-clicks>
-  <div class="text-left ml-30 mt-20 text-2xl">
+  <div class="text-left ml-30 mt-15 text-2xl">
     1. @tanstack/vue-query: 异步状态管理库
   </div>
   <div class="text-left ml-30 py-4 text-2xl">
-    2. 表格的封装和一些用户体验优化
+    2. 表格的封装和用户体验优化
   </div>
   <div class="text-left ml-30 text-2xl">
-    3. Zod: 一个以 TypeScript-First 的数据验证库
+    3. Zod: 一个 TypeScript-First 的数据验证库
   </div>
 </v-clicks>
 
@@ -147,7 +147,7 @@ const { isLoading, isFetching, isError, data, error } = useQuery({
 transition: fade-out
 ---
 
-<img class="h-50vh m-auto" src="https://utopia1994.oss-cn-shanghai.aliyuncs.com/img-bed/202306092353426.png" />
+<img class="h-50vh m-auto" src="https://utopia1994.oss-cn-shanghai.aliyuncs.com/img-bed/202306161451865.png" />
 
 ---
 
@@ -156,18 +156,18 @@ transition: fade-out
 <v-clicks>
 
 - 内置缓存，自动垃圾收集
-- 重复请求去除，解决竞态的问题
+- 重复请求取最后一次，解决竞态的问题
 - 窗口聚焦时重新验证（visibilitychange or focus）
 - 网络恢复时重新验证
 - 错误重试
 - 分页查询、无限查询和滚动位置恢复
-- 支持 TypeScript
 - 轮询/长轮询
 - 有依赖的查询
 - 查询取消
 - 乐观更新
 - 离线缓存(实验中)
 - 支持 SSR / ISR / SSG
+- TypeScript 支持良好
 - 开发者工具 (官方 vue devtool 已集成)
 
 </v-clicks>
@@ -224,7 +224,7 @@ layout: center
 - 封装组件 TableWrap, 规范、统一布局。
 - 封装 hook - useTable, 减少样板代码。
 - 分页、筛选条件、搜索条件、排序状态的持久化（同步到 url）。
-- 应缓存用户在原列表中的浏览位置，并标记列表中已浏览项，当用户返回上级页面是回到原浏览位置。
+- 应缓存用户在原列表中的浏览位置，当用户返回上级页面是回到原浏览位置。
 - 当页面内容不足一页时，不展示分页器。
 - 表格中的时间、状态、操作栏需保持词语完整不过行。
 - 诸如金额、数量等数值分布排列时，通常采用“右对齐”方式，既方便用户快捷读取数据，还可以使用户进行纵向数据对比。
@@ -234,7 +234,7 @@ layout: center
 
 </v-clicks>
 
-<img v-show="$slidev.nav.clicks === 6" class="w-350px absolute bottom-100px right-20px" src="https://gw.alipayobjects.com/mdn/rms_08e378/afts/img/A*vjAcTqS6VKoAAAAAAAAAAABkARQnAQ" />
+<img v-show="$slidev.nav.clicks === 7" class="w-350px absolute bottom-70px right-20px" src="https://gw.alipayobjects.com/mdn/rms_08e378/afts/img/A*vjAcTqS6VKoAAAAAAAAAAABkARQnAQ" />
 
 ---
 transition: fade-out
@@ -245,7 +245,7 @@ layout: center
 <div>
   Zod 是一个以 TypeScript-First 的数据验证库，弥补了 TypeScript 无法在运行时进行校验的问题。
 
-  Zod 既可以用在服务端也可以运行在客户端，以保障 Web Apps。
+  Zod 既可以用在服务端也可以运行在客户端。
 </div>
 
 ---
@@ -283,6 +283,8 @@ formSchema.safeParse({name: 'utopia'}); // => { success: false; error: ZodError 
 </v-click>
 
 ---
+
+# 基于 Schema 推导 TS 类型
 
 ```ts
 const formSchema = z.object({
@@ -324,12 +326,12 @@ type FormState = {
 # Zod 的优点
 <v-clicks>
 
-- 它很小：8kb 缩小 + 压缩
+- tiny：8kb 缩小 + 压缩
 - 零依赖
 - 基于 schema 推导 ts 类型
-- 简洁、可链接的界面
+- 简洁、可链接调用的 API
 - 支持 Promise 和函数模式
-- 也适用于纯 JavaScript！你不需要使用 TypeScript。
+- 也适用于纯 JavaScript！你不一定需要使用 TypeScript。
 
 </v-clicks>
 
